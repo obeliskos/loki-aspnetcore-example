@@ -1,0 +1,5 @@
+node_modules/
+dbinstances/*.*
+!dbinstances/placeholder.txt
+obj/
+bin/

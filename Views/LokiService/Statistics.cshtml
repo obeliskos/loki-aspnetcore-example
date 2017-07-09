@@ -1,0 +1,236 @@
+@using LokiAspnetCore.Classes;
+
+@model LokiAspnetCore.Classes.LokiStatistics
+
+@{
+    ViewData["Title"] = "Loki DB Statistics";
+}
+
+@section css {
+    h3 {
+        color:darkgreen;
+    }
+
+    td.border-left {
+        border-left:1px solid; 
+        padding-left:5px;
+    }
+}
+
+<div style="color:darkgreen"></div>
+
+<h3>Loki Service Configuration</h3>
+<br/>
+<table>
+    <tr>
+        <td valign="top">
+            <table style="width:460px">
+                <tr>
+                    <th>Node Process Variable</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Loki Instance started :</td>
+                    <td>@DateTimeOffset.FromUnixTimeMilliseconds(Model.Start).ToLocalTime().ToString()</td>
+                </tr>
+                <tr>
+                    <td>Node uptime : </td>
+                    <td><b>@TimeSpan.FromSeconds((double) @Model.NodeUptime).ToString("dd\\.hh\\:mm\\:ss") (d.h:m:s)</b></td>
+                </tr>
+                <tr>
+                    <td>Platform: </td>
+                    <td>@Model.Platform</td>
+                </tr>
+                <tr>
+                    <td>Arch: </td>
+                    <td>@Model.Arch</td>
+                </tr>
+                <tr>
+                    <td>ExecPath: </td>
+                    <td>@Model.ExecPath</td>
+                </tr>
+                <tr>
+                    <td>CPU Usage (User): </td>
+                    <td>@TimeSpan.FromMilliseconds(@Model.CpuUsageUser).ToString("hh\\:mm\\:ss\\:fff")</td>
+                </tr>
+                <tr>
+                    <td>CPU Usage (System): </td>
+                    <td>@TimeSpan.FromMilliseconds(@Model.CpuUsageSystem).ToString("hh\\:mm\\:ss\\:fff")</td>
+                </tr>
+                <tr>
+                    <td>CPU Usage (Total): </td>
+                    <td><b>@TimeSpan.FromMilliseconds(@Model.CpuUsageUser + @Model.CpuUsageSystem).ToString("hh\\:mm\\:ss\\:fff")</b></td>
+                </tr>
+            </table>
+        </td>
+        <td valign="top" class="border-left">
+            <table style="width:460px">
+                <tr>
+                    <th>Process</th>
+                    <th>Version</th>
+                </tr>
+                <tr>
+                    <td>node.js :</td>
+                    <td>@Model.ProcessVersions.node</td>
+                </tr>
+                <tr>
+                    <td>v8 :</td>
+                    <td>@Model.ProcessVersions.v8</td>
+                </tr>
+                <tr>
+                    <td>http_parser : </td>
+                    <td>@Model.ProcessVersions.http_parser</td>
+                </tr>
+                <tr>
+                    <td>uv :</td>
+                    <td>@Model.ProcessVersions.uv</td>
+                </tr>
+                <tr>
+                    <td>zlib :</td>
+                    <td>@Model.ProcessVersions.zlib</td>
+                </tr>
+                <tr>
+                    <td>ares :</td>
+                    <td>@Model.ProcessVersions.ares</td>
+                </tr>
+                <tr>
+                    <td>icu :</td>
+                    <td>@Model.ProcessVersions.icu</td>
+                </tr>
+                <tr>
+                    <td>modules :</td>
+                    <td>@Model.ProcessVersions.modules</td>
+                </tr>
+                <tr>
+                    <td>openssl :</td>
+                    <td>@Model.ProcessVersions.openssl</td>
+                </tr>
+            </table>
+        </td>
+</table>
+
+<h3>Memory Usage and Request Statistics</h3>
+
+<br/>
+<table>
+    <tr>
+        <td valign="top">
+            <table style="width:460px">
+                <tr>
+                    <th>Memory Usage Statistic</th>
+                    <th>Size</th>
+                    <th></th>
+                </tr>
+                <tr>
+                    <td>RSS (Resident Set Size)</td>
+                    <td><b>@Model.MemoryUsage.RssText</b></td>
+                    <td>@Model.MemoryUsage.Rss bytes</td>
+                </tr>
+                <tr>
+                    <td>HeapTotal </td>
+                    <td>@Model.MemoryUsage.HeapTotalText</td>
+                    <td>@Model.MemoryUsage.HeapTotal bytes</td>
+                </tr>
+                <tr>
+                    <td>Heap Used</td>
+                    <td>@Model.MemoryUsage.HeapUsedText</td>
+                    <td>@Model.MemoryUsage.HeapUsed bytes</td>
+                </tr>
+            </table>
+        </td>
+        <td valign="top" class="border-left">
+            <table style="width:460px">
+                <tr>
+                    <th>Request Statistic</th>
+                    <th>Request Count</th>
+                    <th>Process Time (ms)</th>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td>@Model.RequestStats.TotalRequests</td>
+                    <td><b>@Model.RequestStats.TotalTime</b></td>
+                </tr>
+                <tr>
+                    <td>Gets</td>
+                    <td>@Model.RequestStats.GetRequests</td>
+                    <td>@Model.RequestStats.GetTime</td>
+                </tr>
+                <tr>
+                    <td>Finds</td>
+                    <td>@Model.RequestStats.FindRequests</td>
+                    <td>@Model.RequestStats.FindTime</td>
+                </tr>
+                <tr>
+                    <td>Transforms</td>
+                    <td>@Model.RequestStats.TransformRequests</td>
+                    <td>@Model.RequestStats.TransformTime</td>
+                </tr>
+                <tr>
+                    <td>Inserts</td>
+                    <td>@Model.RequestStats.InsertRequests</td>
+                    <td>@Model.RequestStats.InsertTime</td>
+                </tr>
+                <tr>
+                    <td>Updates</td>
+                    <td>@Model.RequestStats.UpdateRequests</td>
+                    <td>@Model.RequestStats.UpdateTime</td>
+                </tr>
+                <tr>
+                    <td>Removes</td>
+                    <td>@Model.RequestStats.RemoveRequests</td>
+                    <td>@Model.RequestStats.RemoveTime</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<br/>
+<p>
+    <h3>List of Running Database Instances :</h3>
+    <table style="width:800px">
+        <tr>
+            <th>Details</th>
+            <th>Initializer Name</th>
+            <th>Instance Name</th>
+        </tr>
+
+        @foreach (LokiInstanceName instance in @Model.InstanceNames)
+        {
+        <tr>
+            <td><a href="#" onclick="showInstanceDetails(&quot;@instance.InitializerName&quot;, &quot;@instance.InstanceName&quot;);">Show Details</a></td>
+            <td>@instance.InitializerName</td>
+            <td>@instance.InstanceName</td>
+        </tr>
+        }
+    </table>
+
+</p>
+
+<br/>
+<div id="instance-stats-div" style="display:none; background-color:beige; padding: 5px; border:1px solid">
+</div>
+
+@section Scripts {
+    <script>
+    function showInstanceDetails(initializerName, instanceName) {
+        $.ajax({
+            url: "/LokiService/InstanceStatsPartial",
+            type: "POST",
+            data: { initializer: initializerName, databasePath: instanceName },
+            cache: false,
+            dataType: 'text',
+            success: function (result) {
+                if (!result) return;
+                $("#instance-stats-div").html(result);
+                $("#instance-stats-div").show();
+            },
+            error: function (request, status, error) {
+
+                alert("error calling /LokiService/InstanceStatsPartial " + error);
+            }
+        });        
+    }
+    
+    </script>
+}

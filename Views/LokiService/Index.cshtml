@@ -1,0 +1,213 @@
+@{
+    ViewData["Title"] = "LokiService Index";
+}
+<h3>@ViewData["Message"]</h3>
+
+<h3>Utility page for testing a controller which exposes raw (untyped) interface.</p>
+
+<p>This page will use the aspnet server merely as a conduit for passing params to node lokiservice.</p>
+
+<br/>
+
+<h4>Users (initial population via razor markup)</h4>
+<select id="selUsers" size="10" style="width:200px" onclick="userSelected()">
+    @foreach (var user in ViewBag.users)
+    {
+        <option value=@user["$loki"]>@user["name"]</option>
+    }
+</select><br/>
+
+<button onclick="newClicked()">new</button>
+<button onclick="deleteClicked()">delete</button>
+<button onclick="refreshUsers()">refresh</button>
+</p>
+<table border="1" style="width:300px">
+    <tr>
+        <td>
+            <label>$loki : </label>
+        </td>
+        <td>
+            <label id="lblUsersLoki"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>name : </label>
+        </td>
+        <td>
+            <input type="text" id="txtUsersName" value=""/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <label>age : </label>
+        </td>
+        <td>
+            <input type="text" id="txtUsersAge"/>
+        </td>
+    </tr>
+</table><br/>
+<button onclick="saveClicked()">save</button>
+
+<script>
+    function userSelected() {
+        var userId = parseInt($("#selUsers option:selected").val(), 10);
+
+        var params = {
+            collection: "users",
+            queryObject: JSON.stringify({"$loki":userId})
+        };
+
+        $.ajax({
+            url: "/LokiService/Find",
+            type: "POST",
+            data: params,
+            cache: false,
+            dataType: 'json',
+            success: function (result) {
+                if (!result || result.length === 0) return;
+
+                // must have found it, so update form fields
+                $("#lblUsersLoki").text(result[0].$loki);
+                $("#txtUsersName").val(result[0].name);
+                $("#txtUsersAge").val(result[0].age);
+            },
+            error: function (reqest, status, error) {
+                callback(new Error(request.responseText));
+            }
+        });
+    }
+
+    function newClicked() {
+        $("#lblUsersLoki").text("");
+        $("#txtUsersName").val("");
+        $("#txtUsersAge").val("");
+    }
+
+    function deleteClicked() {
+        var userId = parseInt($("#selUsers option:selected").val(), 10);
+
+        var params = {
+            collection: "users",
+            id: userId
+        };
+
+        $.ajax({
+            url: "/LokiService/Remove",
+            type: "POST",
+            data: params,
+            cache: false,
+            dataType: 'json',
+            success: function (result) {
+                refreshUsers();
+            },
+            error: function (reqest, status, error) {
+                callback(new Error(request.responseText));
+            }
+        });
+    }
+
+    function saveClicked() {
+        var lokiId = $("#lblUsersLoki").text().trim();
+        var name = $("#txtUsersName").val();
+        var age = $("#txtUsersAge").val();
+        var doc;
+
+        if (lokiId === "") {
+            var params = {
+                collection: "users",
+                obj: JSON.stringify({ name: name, age: age })
+            };
+
+            $.ajax({
+                url: "/LokiService/Insert",
+                type: "POST",
+                data: params,
+                cache: false,
+                dataType: 'json',
+                success: function (result) {
+                    if (!result) return;
+
+                    $("#lblUsersLoki").text(result.$loki);
+                    refreshUsers();
+                },
+                error: function (reqest, status, error) {
+                    callback(new Error(request.responseText));
+                }
+            });
+        }
+        else {
+            var userId = parseInt($("#selUsers option:selected").val(), 10);
+
+            var params = {
+                collection: "users",
+                queryObject: JSON.stringify({"$loki":userId})
+            };
+
+            $.ajax({
+                url: "/LokiService/Find",
+                type: "POST",
+                data: params,
+                cache: false,
+                dataType: 'json',
+                success: function (result) {
+                    if (!result || result.length === 0) return;
+
+                    var obj = result[0];
+                    obj.name = $("#txtUsersName").val();
+                    obj.age = $("#txtUsersAge").val();
+                    obj.age = parseInt(obj.age, 10);
+
+                    params = {
+                        collection: "users",
+                        obj: JSON.stringify(obj)
+                     };
+
+                    $.ajax({
+                        url: "/LokiService/Update",
+                        type: "POST",
+                        data: params,
+                        cache: false,
+                        dataType: 'json',
+                        success: function (result) {
+                            refreshUsers();
+                        },
+                        error: function (reqest, status, error) {
+                            console.log(error);
+                        }
+                    });
+
+                },
+                error: function (reqest, status, error) {
+                    console.log(error);
+                }
+            });
+        }
+    }
+
+    function refreshUsers() {
+        $("#selUsers").empty();
+
+        $.ajax({
+            url: "/LokiService/Find",
+            type: "POST",
+            data: { collection: 'users', queryObject: "{}"},
+            cache: false,
+            dataType: 'json',
+            success: function (result) {
+                if (!result || result.length === 0) return;
+
+                result.forEach(function(obj){
+                    $("#selUsers").append($('<option>', {
+                        value: obj.$loki,
+                        text: obj.name
+                    }));
+                });
+            },
+            error: function (reqest, status, error) {
+                callback(new Error(request.responseText));
+            }
+        });
+    }
+
+</script>

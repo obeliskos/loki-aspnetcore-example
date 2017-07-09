@@ -1,0 +1,141 @@
+@using LokiAspnetCore.Classes;
+
+@model LokiInstanceStats
+
+<hr/>
+
+<h3>Instance Statistics :</h3>
+
+<table>
+    <tr>
+        <td valign="top">
+            <table style="width:460px">
+                <tr>
+                    <th>Instance Db Setting</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Instance Name (Filename)</td>
+                    <td><b>@Model.Filename</b></td>
+                </tr>
+                <tr>
+                    <td>Service Name (Initializer)</td>
+                    <td>@Model.ServiceName</td>
+                </tr>
+                <tr>
+                    <td>Autosave</td>
+                    <td>@Model.Autosave</td>
+                </tr>
+                <tr>
+                    <td>Autosave Interval</td>
+                    <td>@Model.AutosaveInterval</td>
+                </tr>
+                <tr>
+                    <td>Database Version</td>
+                    <td>@Model.DatabaseVersion</td>
+                </tr>
+                <tr>
+                    <td>Throttled Saves</td>
+                    <td>@Model.ThrottledSaves</td>
+                </tr>
+            </table>
+        </td>
+        <td valign="top" class="border-left">
+            <table style="width:460px">
+                <tr>
+                    <th>Request Statistic</th>
+                    <th>Request Count</th>
+                    <th>Process Time (ms)</th>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <td>@Model.RequestStats.TotalRequests</td>
+                    <td>@Model.RequestStats.TotalTime</td>
+                </tr>
+                <tr>
+                    <td>Gets</td>
+                    <td>@Model.RequestStats.GetRequests</td>
+                    <td>@Model.RequestStats.GetTime</td>
+                </tr>
+                <tr>
+                    <td>Finds</td>
+                    <td>@Model.RequestStats.FindRequests</td>
+                    <td>@Model.RequestStats.FindTime</td>
+                </tr>
+                <tr>
+                    <td>Transforms</td>
+                    <td>@Model.RequestStats.TransformRequests</td>
+                    <td>@Model.RequestStats.TransformTime</td>
+                </tr>
+                <tr>
+                    <td>Inserts</td>
+                    <td>@Model.RequestStats.InsertRequests</td>
+                    <td>@Model.RequestStats.InsertTime</td>
+                </tr>
+                <tr>
+                    <td>Updates</td>
+                    <td>@Model.RequestStats.UpdateRequests</td>
+                    <td>@Model.RequestStats.UpdateTime</td>
+                </tr>
+                <tr>
+                    <td>Removes</td>
+                    <td>@Model.RequestStats.RemoveRequests</td>
+                    <td>@Model.RequestStats.RemoveTime</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+<h3>Collection Details</h3>
+
+<table style="width:920px">
+    <tr>
+        <th>Name</th>
+        <th>Count</th>
+        <th>Dirty</th>
+        <th>Clone*</th>
+        <th>AdaptiveBinaryIndices</th>
+        <th>Binary Indices</th>
+        <th>Unique Indices</th>
+        <th>Transforms</th>
+        <th>DynamicViews</th>
+    </tr>
+@foreach (LokiCollectionInfo collinfo in @Model.CollectionInfo)
+{
+    <tr>
+        <td valign="top"><b>@collinfo.Name</b></td>
+        <td valign="top">@collinfo.Count</td>
+        <td valign="top">@collinfo.Dirty</td>
+        <td valign="top">@collinfo.Clone</td>
+        <td valign="top">@collinfo.AdaptiveBinaryIndices</td>
+        <td valign="top">
+        @foreach (string biname in @collinfo.BinaryIndices)
+        {
+            <span>@biname</span><br/>
+        }
+        </td>
+        <td valign="top">
+        @foreach (string uiname in @collinfo.UniqueIndices)
+        {
+            <span>@uiname</span>
+        }
+        </td>
+        <td valign="top">
+        @foreach (string txname in @collinfo.Transforms)
+        {
+           <span>@txname</span><br/>
+        }
+        </td>
+        <td valign="top">
+        @foreach (string dvname in @collinfo.DynamicViews)
+        {
+            <span>@dvname</span><br/>
+        }
+        </td>
+    </tr>
+}
+</table>
+<br/>
+<span><i>* NodeServices communication already serializes objects so cloning is not preferred unless needed within initializer</span>
+<br/>

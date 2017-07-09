@@ -1,0 +1,253 @@
+@{
+    ViewData["Title"] = "User Example";
+}
+
+<h3>'User' utility page with strongly-typed model binding</h3>
+    
+<p>This webpage will depend on its own strongly typed json controller actions, 
+    which in turn will use higher level c# Loki interface classes and 'generic' methods.</p>
+
+<p>Since all interactions with this database instance will be strictly controlled, we can insert strongly typed objects
+    and expect the same in return. Ultimately these strong types are rendered into JSON objects for storage, but 
+    we can query with the same strong type to inflate generic objects back into strongly types instances and lists.</p>
+
+<br/>
+@using LokiAspnetCore.Classes
+@model List<User>
+
+@section css {
+    th {
+        width : 200px;
+    }
+
+    table.editor tr:nth-child(even) {
+        background: #f0f0f0
+    }
+    table.editor tr:nth-child(odd) {
+        background: #fff
+    }    
+
+    td {
+        vertical-align: top;
+    }
+}
+
+<h3>Users collection :</h3>
+<table width="100%">
+<tr>
+    <td>
+        <select id="users-select" size="10" style="width:200px" onclick="userSelected()">
+            @foreach (User user in Model)
+            {
+                <option value="@user.Id"]>@user.Name</option>
+            }
+        </select><br/>
+    </td>
+    <td valign="top">
+        <table id="user-editor" class="editor">
+            <tr>
+                <th>Property</th>
+                <th>Value</th>
+                <th>Value Edit</th>
+            </tr>
+            <tr>
+                <td>Id</td>
+                <td><label id="id-view"/></td>
+                <td><label id="id-edit"/></td>
+            </tr>
+            <tr>
+                <td>Name</td>
+                <td><label id="name-view"/></td>
+                <td><input id="name-edit"/></td>
+            </tr>
+            <tr>
+                <td>Age</td>
+                <td><label id="age-view"/></td>
+                <td><input id="age-edit"/></td>
+            </tr>
+            <tr>
+                <td>Gender (Readonly for now)</td>
+                <td><label id="gender-view"/></td>
+                <td><label id="gender-edit"/></td>
+            </tr>
+            <tr>
+                <td>Attributes (Readonly for now)</td>
+                <td><select id="attributes-view" size="5" style="width:120px" /></td>
+                <td><select id="attributes-edit" size="5" style="width:120px" /></td>
+            </tr>
+        </table>
+        <div id="editor-button-div" style="display:none">
+            <button id="save-button" onclick="saveUser()">Save</button>
+            <button id="cancel-button" onclick="cancelEdit()">Cancel</button>
+        </div>
+    </td>
+</tr>
+</table>
+
+<button onclick="newUser()">New</button>
+<button onclick="toggleMode()">Edit</button>
+<button onclick="removeUser()">Delete</button>
+
+@section Scripts {
+<script>
+
+var editMode = true;
+
+$(document).ready(function() {
+    //set initial mode to view
+    toggleMode();
+});
+
+function toggleMode() {
+    editMode = !editMode;
+
+    if (editMode) {
+        $("#editor-button-div").show();
+        $('#user-editor th:nth-child(2)').hide();
+        $('#user-editor td:nth-child(2)').hide();
+        $('#user-editor th:nth-child(3)').show();
+        $('#user-editor td:nth-child(3)').show();
+    }
+    else {
+        $("#editor-button-div").hide();
+        $('#user-editor th:nth-child(2)').show();
+        $('#user-editor td:nth-child(2)').show();
+        $('#user-editor th:nth-child(3)').hide();
+        $('#user-editor td:nth-child(3)').hide();
+    }
+}
+
+function setEditMode() {
+    editMode = false;
+    toggleMode();
+}
+
+function newUser() {
+    $("#id-view").text(0);
+    $("#id-edit").text(0);
+    $("#name-view").text("");
+    $("#name-edit").val("");
+    $("#age-view").text("");
+    $("#age-edit").val("");
+    
+    editMode = false;
+    toggleMode();
+}
+
+function userSelected() {
+    var userId = $("#users-select option:selected").val();
+
+    editMode = true;
+    toggleMode();
+
+    $.ajax({
+        url: "/User/Get",
+        type: "POST",
+        data: { userId: userId },
+        cache: false,
+        dataType: 'json',
+        success: function (result) {
+            if (!result) return;
+
+            // C# object when sent through Json serializer
+            // got re-assigned the 'javascript-side' property names
+            // which are the same as original (including $loki and meta)
+
+            $("#id-view").text(result.$loki);
+            $("#id-edit").text(result.$loki);
+            $("#name-view").text(result.name);
+            $("#name-edit").val(result.name);
+            $("#age-view").text(result.age);
+            $("#age-edit").val(result.age);
+            $("#gender-view").text(result.gender?"female":"male");
+            $("#gender-edit").text(result.gender?"female":"male");
+
+            $("#attributes-view").html("");
+            $("#attributes-edit").html("");
+            if (result.tags) {
+                result.tags.forEach(function(tag) {
+                    $('#attributes-view').append($('<option>', { text: tag }));
+                    $('#attributes-edit').append($('<option>', { text: tag }));
+                });
+            }
+
+
+        },
+        error: function (request, status, error) {
+            alert("error calling /User/Get " + error);
+        }
+    });
+}
+
+function saveUser() {
+    // upstream it seems its expecting c# actual property name
+    // and not using JsonProperty attribute annotations
+    var user = {
+        id: $("#id-edit").text(),
+        name: $("#name-edit").val(),
+        age: $("#age-edit").val()
+    }
+
+    $.ajax({
+        url: "/User/Update",
+        type: "POST",
+        data: user,
+        cache: false,
+        dataType: 'json',
+        success: function (result) {
+            if (!result) return;
+
+            // Downstream, the C# objects (which have JsonProperty attributes annotations) 
+            // got re-assigned the 'javascript-side' property names
+            // which are the same as original (including $loki and meta)
+
+            $("#id-view").text(result.$loki);
+            $("#id-edit").text(result.$loki);
+            $("#name-view").text(result.name);
+            $("#name-edit").val(result.name);
+            $("#age-view").text(result.age);
+            $("#age-edit").val(result.age);
+
+            if (user.id === "0") {
+                $("#users-select").append($('<option>', {
+                    value: result.$loki,
+                    text: result.name
+                }));
+            }
+
+            editMode = true;
+            toggleMode();
+        },
+        error: function (request, status, error) {
+            alert("error calling /User/Update " + error);
+        }
+    });
+    
+}
+
+function removeUser() {
+    var userId = $("#users-select option:selected").val();
+
+    $.ajax({
+        url: "/User/Remove",
+        type: "POST",
+        data: { userId: userId },
+        cache: false,
+        dataType: 'json',
+        success: function (result) {
+            $("#users-select option:selected").remove();
+        },
+        error: function (request, status, error) {
+            alert("error calling /User/Get " + error);
+        }
+    });
+    
+}
+
+function cancelEdit() {
+    editMode = true;
+    toggleMode();
+}
+
+</script>
+}

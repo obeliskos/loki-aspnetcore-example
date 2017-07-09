@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "About";
+}
+<h2>@ViewData["Title"].</h2>
+<h3>@ViewData["Message"]</h3>
+
+<p>This project is intended to prove viability of using ASP.NET Core NodeServices, 
+    along with a lokijs service layer and database to provide persistence.  
+</p>
+
+<h3>Server Structuring</h3>
+<p>
+    The first time you make a call to lokiservice, asp.net core will spin up a node instance which it will 
+    leave running for the duration of your server's uptime.  This allows lokijs databases (hosted within it) to 
+    maintain state for it's own statistics gathering as well as for your database instances.  Before you can do 
+    anything with the lokiservice, you need to define 'initializers'.  Initializers are factories that essentially 
+    instantiate a lokijs database and initialize it with whatever collections, indices, transforms, and dynamic views the 
+    initializer wishes to put with databases it creates.  You specify the filename at the server level, and pass that into 
+    the lokiservice, which passes it into the initializer.  So you can have more than one database utilizing the same 
+    initializer 'structure', and you can have more than one database initializer, allowing as many simulataneous lokijs 
+    database instances as your memory will allow.  The lokiservices allows for detailed statistical logging of memory and 
+    process time utilization for monitoring this, and this demo application instruments that information with its own example 
+    page.
+</p>
+
+<h3>Database Structuring</h3>
+<p>While you can use this to 'consume' an existing dataset, my intention is that you would use this 
+    more similarly to a 'Code First' pattern where you define your database (document) structure at 
+    the c# level, but handle definition of collection sets, indexing, and server side transforms and views
+    within javascript 'initializers'.</p>
+
+<h3>Document Structuring</h3>
+<p>
+    Due to the nature of LokiJS, the primary '$loki' property (being an invalid property name in C#) is remapped 
+    to 'Id' via [JsonProperty] attributes on the 'LokiDocument' base class object.  
+    If you derive your C# classes (which need to be persisted) from this 'LokiDocument' class we will handle mapping 
+    of '$loki' and 'meta' properties automatically.  As for your own properties you only need to define [JsonProperty] 
+    attributes on properties which you wish to be different in javascript vs c#.  JSON.net is used heavily for transforming 
+    dynamic and generic objects to and from json for interoperating with the 'lokiservice' javascript class module.
+</p>
+
+<h3>Other comments</h3>
+<p>While one could utilize the 'string' overloads of the 'LokiDatabase' class to return raw json (not typed to a c# class), 
+    this project is intended to emphasize asp.net server consumption and production of these objects.  If you wish only to 
+    use the server as a proxy webservice for client javascript ajax calls, then you can set up controller actions utilizing 
+    those 'LokiDatabase' overloads returning raw json strings.
+</p>

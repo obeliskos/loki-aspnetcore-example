@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Transform Example";
+}
+
+@using LokiAspnetCore.Classes
+@using LokiAspnetCore.Controllers
+
+@model TransformViewModel
+
+@section css {
+    th {
+        width : 160px;
+    }
+
+    tr:nth-child(even) {
+        background: #ddd
+    }
+    tr:nth-child(odd) {
+        background: #fff
+    }    
+
+    td {
+        vertical-align: text-top;
+    }
+    
+}
+
+<h3>Transform Examples</h3>
+<br/><br/>
+
+<h4>'Goddesses' Transform results (parameterized) :</h4>
+@Html.Partial("UserResultsPartial", @Model.Goddesses)
+<br/><br/>
+
+<h4>'Knowlege' Transform results (where filter function) :</h4>
+@Html.Partial("UserResultsPartial", @Model.Knowlege)

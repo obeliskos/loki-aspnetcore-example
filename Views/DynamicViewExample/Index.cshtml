@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "DynamicView Example";
+}
+
+@using LokiAspnetCore.Classes
+@model List<User>
+
+@section css {
+    th {
+        width : 160px;
+    }
+
+    tr:nth-child(even) {
+        background: #ddd
+    }
+    tr:nth-child(odd) {
+        background: #fff
+    }    
+
+    td {
+        vertical-align: text-top;
+    }
+}
+
+<h3>DynamicView Example</h3>
+
+<h4>Results :</h4>
+
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Tags</th>
+    </tr>
+@foreach (User user in Model)
+{
+    <tr>
+        <td>@user.Name</td>
+        <td>@user.Age</td>
+        <td>@user.Gender</td>
+        <td>
+            @foreach(string tag in user.Tags) 
+            {
+                @tag <br/>
+            }
+        </td>
+    </tr>
+}
+</table>
+
