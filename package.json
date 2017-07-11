@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/obeliskos/loki-aspnetcore-example#readme",
   "dependencies": {
-    "loki-nodeservice": "github:obeliskos/loki-nodeservice",
-    "lokijs": "^1.5.0"
+    "loki-nodeservice": "^1.0.0"
   }
 }

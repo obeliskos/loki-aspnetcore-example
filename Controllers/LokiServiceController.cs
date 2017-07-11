@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.NodeServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using LokiAspnetCore.Classes;
+using LokiAspnetCore;
 using System.Text;
 
 namespace LokiAspnetCore.Controllers

@@ -7,7 +7,7 @@
         {
             "taskName": "build",
             "args": [
-                "${workspaceRoot}\\loki-aspnetcore.csproj"
+                "${workspaceRoot}\\loki-aspnetcore-example.csproj"
             ],
             "isBuildCommand": true,
             "problemMatcher": "$msCompile"
